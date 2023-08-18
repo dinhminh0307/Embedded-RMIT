@@ -9,9 +9,12 @@
 int main(void) {
   DDRB |= (1 << 5); //Set port B5 as output
   TCCR1B |= (1 << CS10); // TTCR1B used to set mode for timer, setup timer1 (16 bit) since 
-
+  Serial.begin(9600); 
   while (1) {
+    _delay_ms(10000);
+    // Serial.println(TCNT1);
     if (TCNT1 >= 7999) { // TCNT1 will hold the value count incrementingly, if it counts up over the target time, toggle the port and reset timer
+      
       PORTB ^= (1 << 5); // toggle the port B5
       TCNT1 = 0; // Reset timer coutner
     }
