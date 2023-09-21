@@ -6,7 +6,6 @@ volatile int buttonPressed = 0;
 
 int main(void)
 {
-	DDRB |= (1 << 5);	// Set PORTB5 as output for LED - for TESTING
 	DDRD &= ~(1 << 2); // Set PD2 pin (INT0) as input to receive interrupt re-quest
   DDRB |= (1 << 0) | (1 << 1); //PORTB0 & PORTB1 as output
 	EICRA |= (1 << ISC01); // set INT0 to trigger on Falling edge
@@ -14,7 +13,7 @@ int main(void)
 
   TCCR1B |= (1 << WGM12); //CTC Mode On
   TCCR1B |= (1 << CS11) | (1 << CS10); //Prescaler of 64
-  OCR1A = 62499; //Duration: NOT 0.1s
+  OCR1A = 24999; //Duration: NOT 0.1s
   TIMSK1 |= (1 << OCIE1A); //Output Compare Match A Interrupt On
 	sei(); // Turn on the Global Interrupt Enable Bit
 
