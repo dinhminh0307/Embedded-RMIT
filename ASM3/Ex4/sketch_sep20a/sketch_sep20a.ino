@@ -20,23 +20,24 @@ int main(void) {
   DDRB |= (1 << CE);
   DDRB |= (1 << SCLK);
   DDRD &= ~(1 << 2); //Set port d2 as input
-  EICRA |= (1 << ISC01); // Detect the falling edge
+  EICRA |= (1 << ISC10); // Detect the falling edge
   EIMSK |= (1 << INT0); // enable exint in portd2
   sei(); // Enalble global interupt
   while(1) {
     if (buttonPressed) {
+      CE_Enable();
       sendCommandByte(MIN_READ);
+      CE_Disable();
     }
   }
 }
 
 void sendCommandByte(uint8_t commandByte) {
-  CE_Enable();
   for(int i = 0; i < 8;i++) {
     int singleBit = (commandByte & (1 << i));
     sendBit(singleBit);
+    SCLK_Triggered();
   }
-  CE_Disable();
 }
 void SCLK_Triggered() {
   PORTB |= (1 << SCLK);
