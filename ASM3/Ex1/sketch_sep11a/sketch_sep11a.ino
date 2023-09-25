@@ -20,8 +20,9 @@ void timer0_init() {
 
 void timer1_init() {
    // For TC1
-  TCCR1A |= (1 << WGM12); // Setup CTC mode for timer 1
+  TCCR1B |= (1 << WGM12); // Setup CTC mode for timer 1
   TCCR1B |= ((1 << CS10) | (1 << CS11)); // Set prescaler for timer 1
+  // TCCR1B |= ((1 << CS12) | (1 << CS10));
   TIMSK1 |= (1 << OCIE1A); // Enable COmp A interupt
   OCR1A = 24999;
 }
