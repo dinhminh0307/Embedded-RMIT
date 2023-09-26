@@ -11,6 +11,7 @@ volatile int buttonPressed = 0;
 int hour;
 int i = 0;
 int j = 0;
+int k = 0;
 uint8_t temp = 0x00;
 
 void writeCommand(int i);
@@ -43,6 +44,7 @@ int main(void)
 
 	while (1)
 	{
+    
 	}
 }
 
@@ -50,7 +52,8 @@ ISR ( TIMER1_COMPA_vect ) {
   if (buttonPressed == 1) { //button is pressed
     DDRB |= (1 << DAT); //Output to DS1302 
     cycle++;
-
+    PORTB |= (1 << 5);
+    Serial.println(0x85);
     if (cycle == 1) { //PORTB0 ON
       PORTB |= (1 << CE);
     } else if (cycle >= 2 && cycle <= 16) { //PORTB1 toggles
@@ -64,24 +67,32 @@ ISR ( TIMER1_COMPA_vect ) {
       PORTB ^= (1 << SCLK);
       DDRB &= ~(1 << DAT); //Input to DS1302 
       //PLUG OSC AND READ THIS PIN: PIND0
-      for(int k = 0; k <=7; k++) {
-        if(readData() == 1) {
+      // for(int k = 0; k <=7; k++) {
+      //   // if(readData(k) == 1) {
+      //   //   temp |= (1 << k);
+      //   // }
+      //   // else {
+      //   //   temp &= ~(1 << k);
+      //   // }
+      // }
+      if(readData(k) == 1) {
           temp |= (1 << k);
         }
         else {
           temp &= ~(1 << k);
         }
-      }
+        k++;
       
     } else if (cycle > 31) { //PORTB1 toggles full 15 cycles
       cycle = 0; //reset cycle to 0 for next button pressed
       buttonPressed = 0; //reset button
-
+      PORTB &= ~(1 << 5);
       PORTB &= ~(1 << CE); //PORTB0 OFF
       temp = 0x00;
     }
+    
   }
-  Serial.println(temp);
+  
 }
   
 
@@ -123,12 +134,11 @@ void writeCommand(int i) {
 }
 
 
-int readData() { //NOT DONE
-  for (i = 0; i <= 7; i++) {
+int readData(int k) { //NOT DONE
     if ( PINB & (1 << DAT) ) { //1
-      return (1 << i);
+      return (1 << k);
     } else { //0
-      return (1 << i);
+      return (1 << k);
     }
   }
 }
