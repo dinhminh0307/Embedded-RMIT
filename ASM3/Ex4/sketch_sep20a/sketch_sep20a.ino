@@ -26,13 +26,15 @@ void btn_init() {
 // Algorithm to read byte for the DS1302
 uint8_t readByte() {
   uint8_t tmp;
+  DDRB &= ~(1 << DAT);
   for(int i = 0; i < 8; i++) {
+    PORTB |= (1 << SCLK);
     if(PINB & (1 << DAT)) {
       tmp |= (1 << i);
     }
-    // Falling Edge of the CLK
-    PORTB |= (1 << SCLK);
-    _delay_ms(1);
+    // // Falling Edge of the CLK
+    
+    // _delay_ms(1);
     PORTB &= ~(1 << SCLK);
   }
   return tmp;
@@ -48,12 +50,12 @@ void OSC_ReadData(uint8_t ctr) {
         else {
           PORTD &= ~(1 << OSC);
         }
-      }
+  }
+  // _delay_ms(200);
 }
 
 // Function to get data from the DS1302
 uint8_t RTC_ReadResponseByte() {
-  DDRB &= ~(1 << DAT);
   uint8_t byte = readByte();
   return byte;
 }
@@ -61,16 +63,15 @@ uint8_t RTC_ReadResponseByte() {
 // THis algorithm used to send byte to DS1302
 void writeByte(uint8_t dat) {
   for(int i = 0; i < 8; i++) {
-    if((dat >> i) & 0x01) {
+    PORTB |= (1 << SCLK);
+    if((dat >> i) & 0x01) { // check if bit is 1 or 0
       PORTB |= (1 << DAT);
     }
     else {
       PORTB &= ~(1 << DAT);
     }
-    //TRigger CLK on Rising Edge
-    PORTB |= (1 << SCLK);
-    _delay_ms(1);
     PORTB &= ~(1 << SCLK);
+    //TRigger CLK on Rising Edge
   }
 }
 
@@ -139,11 +140,27 @@ int convertBCDtoDec(uint8_t ctr) {
   }
   return convert4BitToDec(tmp1) + convert4BitToDec(tmp2);
 }
+
+int bcd_to_decimal(uint8_t bcd_value) {
+  int decimal_value = 0;
+  for (int i = 0; i < 4; i++) {
+    decimal_value += (bcd_value & 0xF);
+    bcd_value >>= 4;
+  }
+  return decimal_value;
+}
+
+void set_time() {
+  CE_Enable();
+  writeByte(0x09);
+  CE_Disable();
+}
 int main(void) {
   DDRD |= (1 << OSC);
   Serial.begin(9600);
   RTC_init();
   btn_init();
+  // set_time();
   while(1) {
     uint8_t ctr;
     if (buttonPressed) {
@@ -152,7 +169,7 @@ int main(void) {
       ctr = RTC_ReadResponseByte(); // get hour data form DS1302 to variable
       OSC_ReadData(ctr); // Display the receive data to OSC
       CE_Disable(); // Disable the CE pin
-      Serial.println(convertBCDtoDec(ctr)); // Print the data from hour to the serial monitor
+      Serial.println(bcd_to_decimal(ctr)); // Print the data from hour to the serial monitor
     }
     PORTD &= ~(1 << OSC);
   }
