@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/setbaud.h>
 #define CE 0
 #define SCLK 1
 #define DAT 2
@@ -10,8 +11,17 @@ int i = 0;
 
 void writeCommand();
 
+
 int main(void)
 {
+  //Setup UART
+  UBRR0H = UBRRH_VALUE;
+  UBRR0L = UBRRL_VALUE;
+  /* Enable UART transmitter/receiver */
+  UCSR0B = (1 << TXEN0) | (1 << RXEN0);
+    /* 8 data bits, 1 stop bit */
+  UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
+
 	DDRB |= (1 << 5);	// Set PORTB5 as output for LED - for TESTING
 	DDRD &= ~(1 << 2); // Set PD2 pin (INT0) as input to receive interrupt re-quest
   DDRB |= (1 << CE) | (1 << SCLK); //PORTB0 - CE & PORTB1 - SCLK as output
