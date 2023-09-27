@@ -19,11 +19,12 @@ int main(void)
 {
   // Init UART
   Serial.begin(9600);
-
-    /* Enable UART transmitter/receiver */
+  /*
+     Enable UART transmitter/receiver
     UCSR0B = (1 << TXEN0) | (1 << RXEN0);
-    /* 8 data bits, 1 stop bit */
+    /* 8 data bits, 1 stop bit 
     UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
+  */
 	DDRB |= (1 << 5);	// Set PORTB5 as output for LED - for TESTING
 	DDRD &= ~(1 << 2); // Set PD2 pin (INT0) as input to receive interrupt re-quest
   DDRB |= (1 << CE) | (1 << SCLK); //PORTB0 - CE & PORTB1 - SCLK as output
@@ -36,10 +37,10 @@ int main(void)
   TIMSK1 |= (1 << OCIE1A); //Output Compare Match A Interrupt On
 	sei(); // Turn on the Global Interrupt Enable Bit
 
-  UCSR0B = (1 << RXEN0 ) | (1 << TXEN0 ); // Turn on the transmission and reception circuitry
-  UCSR0C = (1 << UCSZ00 ) | (1 << UCSZ01 ); // Use 8- bit character sizes
+  // UCSR0B = (1 << RXEN0 ) | (1 << TXEN0 ); // Turn on the transmission and reception circuitry
+  // UCSR0C = (1 << UCSZ00 ) | (1 << UCSZ01 ); // Use 8- bit character sizes
 
-  UCSR0B = (1 << RXCIE0) | (1 << TXCIE0); //Enable RX and TX Complete Interrupt
+  // UCSR0B = (1 << RXCIE0) | (1 << TXCIE0); //Enable RX and TX Complete Interrupt
 
 	while (1)
 	{
@@ -88,7 +89,7 @@ ISR ( TIMER1_COMPA_vect ) {
 ISR ( INT0_vect )	// ISR for the INT0
 { 
   buttonPressed = 1;
-  _delay_ms(1000);
+  _delay_ms(500);
 }
 
 void writeCommand(int i) {
