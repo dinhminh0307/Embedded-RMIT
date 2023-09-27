@@ -22,7 +22,7 @@ void writeCommand(int i);
 int main(void)
 {
   // Init UART
-  Serial.begin(9600);
+  // Serial.begin(9600);
   /*
      Enable UART transmitter/receiver
     UCSR0B = (1 << TXEN0) | (1 << RXEN0);
@@ -80,12 +80,12 @@ ISR ( TIMER1_COMPA_vect ) {
       //   }
       // }
       if( (readData() == 1) && !(PORTB & (1 << SCLK))) {
-          DDRB |= (1 << DAT);
+          // DDRB |= (1 << DAT);
           temp |= (1 << k);
           PORTB |= (1 << DAT);
         }
         else if (readData() == 0 && !(PORTB & (1 << SCLK))) {
-          DDRB |= (1 << DAT);
+          // DDRB |= (1 << DAT);
           temp &= ~(1 << k);
           PORTB &= ~(1 << DAT);
         }
@@ -153,5 +153,3 @@ int readData() { //NOT DONE
       return 0;
     }
   }
-
-
