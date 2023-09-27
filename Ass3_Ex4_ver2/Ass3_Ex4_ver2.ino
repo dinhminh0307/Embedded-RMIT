@@ -4,7 +4,7 @@
 #define CE 0
 #define SCLK 1
 #define DAT 2
-
+#define TEST 5
 
 int cycle = 0;
 volatile int buttonPressed = 0;
@@ -16,6 +16,9 @@ uint8_t temp = 0x00;
 
 void writeCommand(int i);
 
+//PORTB |= (1 << TEST);
+// | (1 << TEST);
+
 int main(void)
 {
   // Init UART
@@ -26,7 +29,7 @@ int main(void)
     /* 8 data bits, 1 stop bit 
     UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
   */
-	DDRB |= (1 << 5);	// Set PORTB5 as output for LED - for TESTING
+	DDRB |= (1 << TEST);	// Set PORTB5 as output for LED - for TESTING
 	DDRD &= ~(1 << 2); // Set PD2 pin (INT0) as input to receive interrupt re-quest
   DDRB |= (1 << CE) | (1 << SCLK); //PORTB0 - CE & PORTB1 - SCLK as output
 	EICRA |= (1 << ISC01); // set INT0 to trigger on Falling edge
@@ -34,7 +37,7 @@ int main(void)
 
   TCCR1B |= (1 << WGM12); //CTC Mode On
   TCCR1B |= (1 << CS11) | (1 << CS10); //Prescaler of 64
-  OCR1A = 2499; //Duration: 0.05s
+  OCR1A = 24999; //Duration: 0.05s
   TIMSK1 |= (1 << OCIE1A); //Output Compare Match A Interrupt On
 	sei(); // Turn on the Global Interrupt Enable Bit
 
@@ -60,7 +63,7 @@ ISR ( TIMER1_COMPA_vect ) {
     } else if (cycle >= 2 && cycle <= 16) { //PORTB1 toggles
       PORTB ^= (1 << SCLK);
 
-      if (PORTB & (1 << SCLK)) { //rising-edge
+      if (cycle % 2 == 0) { //rising-edge
         writeCommand(i);
         i++;
       }
@@ -76,11 +79,13 @@ ISR ( TIMER1_COMPA_vect ) {
       //   //   temp &= ~(1 << k);
       //   // }
       // }
-      if(readData(k) == 1) {
+      if( (readData() == 1) && (cycle % 2 == 1) ) {
           temp |= (1 << k);
+          PORTB |= (1 << DAT);
         }
         else {
           temp &= ~(1 << k);
+          PORTB &= ~(1 << DAT);
         }
         k++;
       
@@ -100,34 +105,34 @@ ISR ( TIMER1_COMPA_vect ) {
 ISR ( INT0_vect )	// ISR for the INT0
 { 
   buttonPressed = 1;
-  _delay_ms(500);
+  //_delay_ms(500);
 }
 
 void writeCommand(int i) {
     switch (i) {
       case 0:
-        PORTB |= (1 << DAT); //1
+        PORTB |= (1 << DAT) | (1 << TEST); //1
         break;
       case 1:
-        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << DAT) | (1 << TEST); //0
         break;
       case 2:
-        PORTB |= (1 << DAT); //1
+        PORTB |= (1 << DAT) | (1 << TEST); //1
         break;
       case 3:
-        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << DAT) | (1 << TEST); //0
         break;
       case 4:
-        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << DAT) | (1 << TEST); //0
         break;
       case 5:
-        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << DAT) | (1 << TEST); //0
         break;
       case 6:
-        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << DAT) | (1 << TEST); //0
         break;
       case 7:
-        PORTB |= (1 << DAT); //1
+        PORTB |= (1 << DAT) | (1 << TEST); //1
         break;
       default:
         break;
@@ -135,12 +140,13 @@ void writeCommand(int i) {
 }
 
 
-int readData(int k) { //NOT DONE
+int readData() { //NOT DONE
+
     if ( PINB & (1 << DAT) ) { //1
-      return (1 << k);
+      return 1;
     } else { //0
-      return (1 << k);
+      return 0;
     }
   }
-}
+
 
