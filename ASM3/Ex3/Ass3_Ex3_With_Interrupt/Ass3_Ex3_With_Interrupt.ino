@@ -8,11 +8,15 @@ volatile int buttonPressed = 0;
 
 int main(void)
 {
+  /* PINs SETUP*/
 	DDRD &= ~(1 << 2); // Set PD2 pin (INT0) as input to receive interrupt re-quest
-  DDRB |= (1 << GPIO_1) | (1 << GPIO_2); //PORTB0 & PORTB1 as output
+  DDRB |= (1 << GPIO_1) | (1 << GPIO_2); //PORTB0 (GPIO_1) & PORTB1 (GPIO_2) as output
+
+  /* EXTERNAL INTERRUPT SETUP */
 	EICRA |= (1 << ISC01); // set INT0 to trigger on Falling edge
 	EIMSK  |= (1 << INT0); // Turns on INT0
 
+  /* TIMER1 SETUP */
   TCCR1B |= (1 << WGM12); //CTC Mode On
   TCCR1B |= (1 << CS11) | (1 << CS10); //Prescaler of 64
   OCR1A = 24999; //Duration: NOT 0.1s
@@ -45,6 +49,5 @@ ISR ( TIMER1_COMPA_vect ) {
 ISR ( INT0_vect )	// ISR for the INT0
 { 
   buttonPressed = 1;
-	PORTB ^= (1<<PORTB5);	//Toggle the PB5 connecting to the LED
 }
 
