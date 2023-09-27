@@ -3,6 +3,7 @@
 
 volatile int interval = 1;
 volatile int duration = 1; //1: 0.125s; 2: 0.25s; 3: 0.375s
+int duration_press = 1;
 volatile int direction = 1; //1: PORTB0 to PORTB2; 2: PORTB2 to PORTB0; 
 int noCount = 0;
 
@@ -30,7 +31,7 @@ int main(void)
 }
 
 ISR ( TIMER1_COMPA_vect) {
-  noCount++; //Software Prescaler. Explanation: duration 2 = 2 * duration 1; duration = 3 * duration 1
+  noCount++; //Software Prescaler. Explanation: duration 2 = 2 * duration 1; duration = 6 * duration 1
 
   if (noCount >= duration) {
     noCount = 0;
@@ -82,11 +83,21 @@ ISR(INT0_vect)	// ISR for the INT0
 {
 	PORTB ^= (1<<PORTB5);	//Toggle the PB5 to check button
 
-  duration++;
-
-  if (duration > 3) { //loop through all possible values, return to the start
-    duration = 1; //reset duration back to duration 1
+  if (duration_press == 1) {
+    duration = 1;
+    duration_press++;
+  } else if (duration_press == 2) {
+    duration = 2;
+    duration_press++; //3 for next press
+  } else if (duration_press >= 3) {
+    duration = 6; //0.75s
+    duration_press = 1;
   }
+  // duration++;
+
+  // if (duration > 3) { //loop through all possible values, return to the start
+  //   duration = 1; //reset duration back to duration 1
+  // }
 }
 
 ISR(INT1_vect)	// ISR for the INT0
