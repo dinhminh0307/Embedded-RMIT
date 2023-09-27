@@ -1,16 +1,22 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#define GPIO_1 0
+#define GPIO_2 1
 
-int cycle = 0;
+int half_cycle = 0;
 volatile int buttonPressed = 0;
 
 int main(void)
 {
+  /* PINs SETUP*/
 	DDRD &= ~(1 << 2); // Set PD2 pin (INT0) as input to receive interrupt re-quest
-  DDRB |= (1 << 0) | (1 << 1); //PORTB0 & PORTB1 as output
+  DDRB |= (1 << GPIO_1) | (1 << GPIO_2); //PORTB0 (GPIO_1) & PORTB1 (GPIO_2) as output
+
+  /* EXTERNAL INTERRUPT SETUP */
 	EICRA |= (1 << ISC01); // set INT0 to trigger on Falling edge
 	EIMSK  |= (1 << INT0); // Turns on INT0
 
+  /* TIMER1 SETUP */
   TCCR1B |= (1 << WGM12); //CTC Mode On
   TCCR1B |= (1 << CS11) | (1 << CS10); //Prescaler of 64
   OCR1A = 24999; //Duration: NOT 0.1s
@@ -24,17 +30,17 @@ int main(void)
 
 ISR ( TIMER1_COMPA_vect ) {
   if (buttonPressed == 1) { //button is pressed 
-    cycle++;
+    half_cycle++;
 
-    if (cycle == 1) { //PORTB0 ON
-      PORTB |= (1 << 0);
-    } else if (cycle > 33) { //PORTB1 toggles full 16 cycles
-      cycle = 0; //reset cycle to 0 for next button pressed
+    if (half_cycle == 1) { //GPIO_1 ON
+      PORTB |= (1 << GPIO_1);
+    } else if (half_cycle > 33) { //PORTB1 toggles full 16 cycles
+      half_cycle = 0; //reset cycle to 0 for next button pressed
       buttonPressed = 0; //reset button
 
-      PORTB &= ~(1 << 0); //PORTB0 OFF
+      PORTB &= ~(1 << GPIO_1); //GPIO_1 OFF
     } else { //PORTB1 toggles
-      PORTB ^= (1 << 1);
+      PORTB ^= (1 << GPIO_2);
     }
   }
   
@@ -43,6 +49,5 @@ ISR ( TIMER1_COMPA_vect ) {
 ISR ( INT0_vect )	// ISR for the INT0
 { 
   buttonPressed = 1;
-	PORTB ^= (1<<PORTB5);	//Toggle the PB5 connecting to the LED
 }
 

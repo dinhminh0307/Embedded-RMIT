@@ -2,8 +2,8 @@
 #include <avr/interrupt.h>
 
 volatile bool buttonPressed = false;
-volatile bool quarterFlag = false;
-volatile bool halfFlag = false;
+volatile bool frequency_1 = false; //500Hz (1ms ON, 1ms OFF)
+volatile bool frequency_2 = false; //5Hz (100ms ON, 100ms OFF)
 void btn_init() {
   DDRD &= ~(1 << 2);
   EICRA |= (1 << ISC01);
@@ -26,6 +26,7 @@ void timer1_init() {
   TIMSK1 |= (1 << OCIE1A); // Enable COmp A interupt
   OCR1A = 24999;
 }
+
 int main(void) {
   DDRB |= (1 << 5);
   btn_init();
@@ -33,14 +34,14 @@ int main(void) {
   timer1_init();
   while(1) {
     while(buttonPressed) {
-      if(quarterFlag) {
+      if(frequency_2) {
         PORTB ^= (1 << 5);
-        quarterFlag = false;
+        frequency_2 = false;
     }
   }
-    if(halfFlag) {
+    if(frequency_1) {
     PORTB ^= (1 << 5);
-    halfFlag = false;
+    frequency_1 = false;
     }
   }
 }
@@ -55,8 +56,8 @@ ISR(INT0_vect) {
 }
 
 ISR(TIMER1_COMPA_vect) {
-  quarterFlag = true;
+  frequency_2 = true;
 }
 ISR(TIMER0_COMPA_vect) {
-  halfFlag = true;
+  frequency_1 = true;
 }
