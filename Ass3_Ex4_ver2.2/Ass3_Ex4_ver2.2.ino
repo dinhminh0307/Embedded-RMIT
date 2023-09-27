@@ -7,7 +7,7 @@
 #define TEST 5
 
 
-int cycle = 0;
+int half_cycle = 0;
 volatile int buttonPressed = 0;
 int i = 0;
 
@@ -42,30 +42,29 @@ int main(void) {
 ISR ( TIMER1_COMPA_vect ) {
   if (buttonPressed == 1) { //button is pressed
     DDRB |= (1 << DAT); //Output to DS1302 
-    cycle++;
+    half_cycle++;
 
-    if (cycle == 1) { //PORTB0 ON
+    if (half_cycle == 1) { //PORTB0 ON
       PORTB |= (1 << CE);
-    } else if (cycle >= 2 && cycle <= 16) { //PORTB1 toggles
-      PORTB ^= (1 << SCLK);
-
-      if (PORTB & (1 << SCLK)) { //rising-edge
+    } else if (half_cycle >= 2 && half_cycle <= 16) { //PORTB1 toggles
+      if (half_cycle % 2 == 0) { //rising-edge
         writeCommand(i);
         i++;
       }
-    } else if (cycle >= 17 && cycle <= 31) {
+      _delay_ms(10); //wait 10ms for DAT toggles, then toggles SCLK
       PORTB ^= (1 << SCLK);
-      if (cycle == 17) {
-        DDRB &= ~(1 << DAT); //Input to DS1302 
-      }
+    } else if (half_cycle >= 17 && half_cycle <= 31) {
+      DDRB &= ~(1 << DAT); //Input to DS1302 
+      _delay_ms(10);
+      PORTB ^= (1 << SCLK);
       
       //PLUG OSC AND READ THIS PIN: PIND0
       // if ( !(PORTB & (1 << SCLK)) ) {
       //   readData();
       // }
       
-    } else if (cycle > 31) { //PORTB1 toggles full 15 cycles
-      cycle = 0; //reset cycle to 0 for next button pressed
+    } else if (half_cycle > 31) { //PORTB1 toggles full 15 cycles
+      half_cycle = 0; //reset cycle to 0 for next button pressed
       i = 0;
       buttonPressed = 0; //reset button
 
@@ -78,7 +77,6 @@ ISR ( TIMER1_COMPA_vect ) {
 ISR ( INT0_vect )	// ISR for the INT0
 { 
   buttonPressed = 1;
-  //_delay_ms(500);
 }
 
 void writeCommand(int i) {
