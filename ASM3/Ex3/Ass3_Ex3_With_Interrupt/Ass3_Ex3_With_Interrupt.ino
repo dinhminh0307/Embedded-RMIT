@@ -34,7 +34,7 @@ ISR ( TIMER1_COMPA_vect ) {
 
     if (half_cycle == 1) { //GPIO_1 ON
       PORTB |= (1 << GPIO_1);
-    } else if (half_cycle > 33) { //PORTB1 toggles full 16 cycles
+    } else if (half_cycle > 13) { //PORTB1 toggles full 6 cycles
       half_cycle = 0; //reset cycle to 0 for next button pressed
       buttonPressed = 0; //reset button
 
