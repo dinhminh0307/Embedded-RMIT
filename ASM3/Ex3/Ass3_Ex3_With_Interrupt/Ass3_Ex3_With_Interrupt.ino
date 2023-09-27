@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-int cycle = 0;
+int half_cycle = 0;
 volatile int buttonPressed = 0;
 
 int main(void)
@@ -24,12 +24,12 @@ int main(void)
 
 ISR ( TIMER1_COMPA_vect ) {
   if (buttonPressed == 1) { //button is pressed 
-    cycle++;
+    half_cycle++;
 
-    if (cycle == 1) { //PORTB0 ON
+    if (half_cycle == 1) { //PORTB0 ON
       PORTB |= (1 << 0);
-    } else if (cycle > 33) { //PORTB1 toggles full 16 cycles
-      cycle = 0; //reset cycle to 0 for next button pressed
+    } else if (half_cycle > 33) { //PORTB1 toggles full 16 cycles
+      half_cycle = 0; //reset cycle to 0 for next button pressed
       buttonPressed = 0; //reset button
 
       PORTB &= ~(1 << 0); //PORTB0 OFF
