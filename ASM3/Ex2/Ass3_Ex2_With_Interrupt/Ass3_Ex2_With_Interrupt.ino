@@ -8,17 +8,17 @@ int noCount = 0;
 
 int main(void)
 {
-  DDRD |= (1 << 4) | (1 << 5) | (1 << 6) | (1 << 7); //Output 4 Testing LEDs
-  PORTD |= (1 << 4);
-
+  /* 3 LEDs AND BUTTONS SETUP */
 	DDRB |= (1 << 5); // Set PORTB5 as output for LED - for TESTING BUTTON
 	DDRD &= ~(1 << 2); //PD2 (INT0) - Gear button
   DDRD &= ~(1 << 3); //PD3 (INT1) - Direction button
   DDRB |= (1 << 0) | (1 << 1) | (1 << 2); //3 LEDs - PORTB0 to PORTB2
+
+  /* EXTERNAL INTERRUPT SETUP */
 	EICRA |= (1 << ISC01) | (1 << ISC11);   // set INT0 to trigger on ANY logic change
 	EIMSK  |= (1 << INT0) | (1 << INT1);   // Turns on INT0
 
-  //CTC Timer 1 with Interrupt Mode
+  /* TIMER 1 SETUP */
   TCCR1B |= (1 << WGM12); //CTC Mode On
   TCCR1B |= (1 << CS11) | (1 << CS10); //Prescaler of 64
   OCR1A = 31249; //Duration: 0.125s
@@ -80,7 +80,7 @@ ISR ( TIMER1_COMPA_vect) {
 
 ISR(INT0_vect)	// ISR for the INT0
 {
-	PORTB ^= (1<<PORTB5);	//Toggle the PB5 connecting to the LED
+	PORTB ^= (1<<PORTB5);	//Toggle the PB5 to check button
 
   duration++;
 
@@ -91,7 +91,7 @@ ISR(INT0_vect)	// ISR for the INT0
 
 ISR(INT1_vect)	// ISR for the INT0
 {
-	PORTB ^= (1<<PORTB5);	//Toggle the PB5 connecting to the LED
+	PORTB ^= (1<<PORTB5);	//Toggle the PB5 to check button
 
   direction++; 
 
