@@ -19,7 +19,7 @@ int main(void)
   /* TIMER1 SETUP */
   TCCR1B |= (1 << WGM12); //CTC Mode On
   TCCR1B |= (1 << CS11) | (1 << CS10); //Prescaler of 64
-  OCR1A = 24999; //Duration: NOT 0.1s
+  OCR1A = 24999; //Duration: 0.1s
   TIMSK1 |= (1 << OCIE1A); //Output Compare Match A Interrupt On
 	sei(); // Turn on the Global Interrupt Enable Bit
 
