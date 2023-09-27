@@ -67,10 +67,14 @@ ISR ( TIMER1_COMPA_vect ) {
       //PLUG OSC AND READ THIS PIN: PIND0
       for(int k = 0; k <=7; k++) {
         if(readData() == 1) {
+          DDRB |= (1 << DAT);
+          PORTB |= (1 << DAT);
           temp |= (1 << k);
         }
         else {
+          DDRB |= (1 << DAT);
           temp &= ~(1 << k);
+          PORTB &= ~(1 << DAT);
         }
       }
       
@@ -127,9 +131,9 @@ void writeCommand(int i) {
 int readData() { 
   for (i = 0; i <= 7; i++) {
     if ( PINB & (1 << DAT) ) { //1
-      return (1 << i);
+      return 1;
     } else { //0
-      return (1 << i);
+      return 0;
     }
   }
 }

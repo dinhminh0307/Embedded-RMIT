@@ -98,6 +98,7 @@ ISR ( TIMER1_COMPA_vect ) {
       PORTB &= ~(1 << CE); //PORTB0 OFF
       temp = 0x00;
       k = 0;
+      i = 0;
     }
   }
 }
