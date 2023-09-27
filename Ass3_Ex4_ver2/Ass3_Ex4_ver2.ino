@@ -48,7 +48,6 @@ int main(void)
 
 	while (1)
 	{
-    
 	}
 }
 
@@ -57,13 +56,12 @@ ISR ( TIMER1_COMPA_vect ) {
     DDRB |= (1 << DAT); //Output to DS1302 
     cycle++;
     PORTB |= (1 << 5);
-    Serial.println(0x85);
     if (cycle == 1) { //PORTB0 ON
       PORTB |= (1 << CE);
     } else if (cycle >= 2 && cycle <= 16) { //PORTB1 toggles
       PORTB ^= (1 << SCLK);
 
-      if (cycle % 2 == 0) { //rising-edge
+      if (PORTB & (1 << SCLK)) { //rising-edge
         writeCommand(i);
         i++;
       }
@@ -71,19 +69,23 @@ ISR ( TIMER1_COMPA_vect ) {
       PORTB ^= (1 << SCLK);
       DDRB &= ~(1 << DAT); //Input to DS1302 
       //PLUG OSC AND READ THIS PIN: PIND0
-      // for(int k = 0; k <=7; k++) {
-      //   // if(readData(k) == 1) {
-      //   //   temp |= (1 << k);
-      //   // }
-      //   // else {
-      //   //   temp &= ~(1 << k);
-      //   // }
+      // for(int m = 0; m <=7; m++) {
+      //   if(readData() == 1 && !(PORTB & (1 << SCLK))) {
+      //     temp |= (1 << m);
+      //     PORTB |= (1 << TEST);
+      //   }
+      //   else if(readData() == 0 && !(PORTB & (1 << SCLK))) {
+      //     temp &= ~(1 << m);
+      //     PORTB &= ~(1 << TEST);
+      //   }
       // }
-      if( (readData() == 1) && (cycle % 2 == 1) ) {
+      if( (readData() == 1) && !(PORTB & (1 << SCLK))) {
+          DDRB |= (1 << DAT);
           temp |= (1 << k);
           PORTB |= (1 << DAT);
         }
-        else {
+        else if (readData() == 0 && !(PORTB & (1 << SCLK))) {
+          DDRB |= (1 << DAT);
           temp &= ~(1 << k);
           PORTB &= ~(1 << DAT);
         }
@@ -95,10 +97,9 @@ ISR ( TIMER1_COMPA_vect ) {
       PORTB &= ~(1 << 5);
       PORTB &= ~(1 << CE); //PORTB0 OFF
       temp = 0x00;
+      k = 0;
     }
-    
   }
-  
 }
   
 
@@ -114,22 +115,27 @@ void writeCommand(int i) {
         PORTB |= (1 << DAT) | (1 << TEST); //1
         break;
       case 1:
-        PORTB &= ~(1 << DAT) | (1 << TEST); //0
+        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << TEST);
         break;
       case 2:
         PORTB |= (1 << DAT) | (1 << TEST); //1
         break;
       case 3:
-        PORTB &= ~(1 << DAT) | (1 << TEST); //0
+        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << TEST);
         break;
       case 4:
-        PORTB &= ~(1 << DAT) | (1 << TEST); //0
+        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << TEST);
         break;
       case 5:
-        PORTB &= ~(1 << DAT) | (1 << TEST); //0
+        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << TEST);
         break;
       case 6:
-        PORTB &= ~(1 << DAT) | (1 << TEST); //0
+        PORTB &= ~(1 << DAT); //0
+        PORTB &= ~(1 << TEST);
         break;
       case 7:
         PORTB |= (1 << DAT) | (1 << TEST); //1
@@ -141,7 +147,6 @@ void writeCommand(int i) {
 
 
 int readData() { //NOT DONE
-
     if ( PINB & (1 << DAT) ) { //1
       return 1;
     } else { //0
